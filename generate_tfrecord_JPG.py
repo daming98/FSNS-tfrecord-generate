@@ -9,13 +9,18 @@ import os
 import PIL.Image as Image
 
 
-def encode_utf8_string(text, length, dic, null_char_id=5462):
+def encode_utf8_string(text, length, dic, null_char_id=20000):
     char_ids_padded = [null_char_id]*length
     char_ids_unpadded = [null_char_id]*len(text)
     for i in range(len(text)):
-        hash_id = dic[text[i]]
-        char_ids_padded[i] = hash_id
-        char_ids_unpadded[i] = hash_id
+        if(text[i] in dic):
+            hash_id = dic[text[i]]
+            char_ids_padded[i] = hash_id
+            char_ids_unpadded[i] = hash_id
+        else:
+            hash_id = 20001
+            char_ids_padded[i] = hash_id
+            char_ids_unpadded[i] = hash_id
     return char_ids_padded, char_ids_unpadded
 
 def _bytes_feature(value):
@@ -25,9 +30,9 @@ def _int64_feature(value):
     return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
 
 dict={}
-with open('dic.txt', encoding="utf") as dict_file:
+with open('3.txt', encoding="utf") as dict_file:
     for line in dict_file:
-        (key, value) = line.strip().split('\t')
+        (key, value) = line.strip().split(' ')
         dict[value] = int(key)
 print((dict))
 
@@ -50,15 +55,18 @@ for j in range(0,int(len(addrs_image))):
 
     img = Image.open(addrs_image[j])
 
-    img = img.resize((600, 150), Image.ANTIALIAS)
+    img = img.resize((50, 500), Image.ANTIALIAS)
     np_data = np.array(img)
     image_data = img.tobytes()
-    for text in open(addrs_label[j], encoding="utf"):
-                 char_ids_padded, char_ids_unpadded = encode_utf8_string(
-                            text=text,
-                            dic=dict,
-                            length=37,
-                            null_char_id=5462)
+    try:
+        for text in open(addrs_label[j], encoding="utf"):
+                     char_ids_padded, char_ids_unpadded = encode_utf8_string(
+                                text=text,
+                                dic=dict,
+                                length=37,
+                                )
+    except UnicodeDecodeError:
+        print(addrs_label[j])
 
 
 
