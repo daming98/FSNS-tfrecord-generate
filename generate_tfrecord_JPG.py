@@ -7,25 +7,24 @@ import cv2
 import sys
 import os
 import PIL.Image as Image
-
 #num=str(9)
-for n in range(9,53):
+for n in range(1,53):
     num=str(n)
-    image_path = 'data/'+num+'/*.jpg'
-    label_path = 'data/'+num+'/*.txt'
+    image_path = 'datac/'+num+'/*.jpg'
+    label_path = 'datac/'+num+'/*.txt'
 
-    def encode_utf8_string(text, length, dic, null_char_id=20000):
+    def encode_utf8_string(text, length, dic, null_char_id=7288):
         char_ids_padded = [null_char_id]*length
         char_ids_unpadded = [null_char_id]*len(text)
         for i in range(len(text)):
-            if(text[i] in dic):
-                hash_id = dic[text[i]]
-                char_ids_padded[i] = hash_id
-                char_ids_unpadded[i] = hash_id
-            else:
-                hash_id = 20001
-                char_ids_padded[i] = hash_id
-                char_ids_unpadded[i] = hash_id
+            #if(text[i] in dic):
+            hash_id = dic[text[i]]
+            char_ids_padded[i] = hash_id
+            char_ids_unpadded[i] = hash_id
+            #else:
+            #    hash_id = 7288
+            #    char_ids_padded[i] = hash_id
+            #    char_ids_unpadded[i] = hash_id
         return char_ids_padded, char_ids_unpadded
 
     def _bytes_feature(value):
@@ -61,15 +60,18 @@ for n in range(9,53):
 
         img = Image.open(addrs_image[j])
 
-        img = img.resize((50, 500), Image.ANTIALIAS)
+        img = img.resize((27, 250), Image.ANTIALIAS)
         np_data = np.array(img)
         image_data = img.tobytes()
+        path=addrs_image[j].split(".")[0]
+        label=path+".txt"
         try:
-            for text in open(addrs_label[j], encoding="utf"):
+            for text in open(label, encoding="utf"):
                          char_ids_padded, char_ids_unpadded = encode_utf8_string(
                                     text=text,
                                     dic=dict,
                                     length=37,
+                                    null_char_id=7288
                                     )
         except UnicodeDecodeError:
             print(addrs_label[j])
@@ -92,9 +94,6 @@ for n in range(9,53):
     tfrecord_writer.close()
 
     sys.stdout.flush()
-
-
-
 
 
 
